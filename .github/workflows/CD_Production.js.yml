@@ -1,0 +1,95 @@
+name: Deploy on Production
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  deploy_on_production:
+
+    runs-on: ubuntu-latest
+
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v2
+
+      - name: Create Applications Env file
+        working-directory: ./application
+        run: |
+          touch .env
+          echo JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} >> .env
+          echo MONGO_URI=${{ secrets.MONGO_URI }} >> .env
+          echo JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} >> .env
+          echo JWT_EXPIRES=${{ secrets.JWT_EXPIRES }} >> .env
+          echo COOKIE_EXPIRE=${{ secrets.COOKIE_EXPIRE }} >> .env
+          echo CLOUDINARY_CLIENT_NAME=${{ secrets.CLOUDINARY_CLIENT_NAME }} >> .env
+          echo CLOUDINARY_CLIENT_API=${{ secrets.CLOUDINARY_CLIENT_API }} >> .env
+          echo CLOUDINARY_CLIENT_SECRET=${{ secrets.CLOUDINARY_CLIENT_SECRET }} >> .env
+          echo PORT=4003 >> .env
+          cat .env
+
+      - name: Create Blogs Env file
+        working-directory: ./blog
+        run: |
+          touch .env
+          echo JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} >> .env
+          echo MONGO_URI=${{ secrets.MONGO_URI }} >> .env
+          echo JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} >> .env
+          echo JWT_EXPIRES=${{ secrets.JWT_EXPIRES }} >> .env
+          echo COOKIE_EXPIRE=${{ secrets.COOKIE_EXPIRE }} >> .env
+          echo CLOUDINARY_CLIENT_NAME=${{ secrets.CLOUDINARY_CLIENT_NAME }} >> .env
+          echo CLOUDINARY_CLIENT_API=${{ secrets.CLOUDINARY_CLIENT_API }} >> .env
+          echo CLOUDINARY_CLIENT_SECRET=${{ secrets.CLOUDINARY_CLIENT_SECRET }} >> .env
+          echo PORT=4004 >> .env
+          cat .env
+
+      - name: Create Jobs Env file
+        working-directory: ./job
+        run: |
+          touch .env
+          echo JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} >> .env
+          echo MONGO_URI=${{ secrets.MONGO_URI }} >> .env
+          echo JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} >> .env
+          echo JWT_EXPIRES=${{ secrets.JWT_EXPIRES }} >> .env
+          echo COOKIE_EXPIRE=${{ secrets.COOKIE_EXPIRE }} >> .env
+          echo CLOUDINARY_CLIENT_NAME=${{ secrets.CLOUDINARY_CLIENT_NAME }} >> .env
+          echo CLOUDINARY_CLIENT_API=${{ secrets.CLOUDINARY_CLIENT_API }} >> .env
+          echo CLOUDINARY_CLIENT_SECRET=${{ secrets.CLOUDINARY_CLIENT_SECRET }} >> .env
+          echo PORT=4001 >> .env
+          cat .env 
+
+      - name: Create Users Env file
+        working-directory: ./user
+        run: |
+          touch .env
+          echo JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} >> .env
+          echo MONGO_URI=${{ secrets.MONGO_URI }} >> .env
+          echo JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} >> .env
+          echo JWT_EXPIRES=${{ secrets.JWT_EXPIRES }} >> .env
+          echo COOKIE_EXPIRE=${{ secrets.COOKIE_EXPIRE }} >> .env
+          echo CLOUDINARY_CLIENT_NAME=${{ secrets.CLOUDINARY_CLIENT_NAME }} >> .env
+          echo CLOUDINARY_CLIENT_API=${{ secrets.CLOUDINARY_CLIENT_API }} >> .env
+          echo CLOUDINARY_CLIENT_SECRET=${{ secrets.CLOUDINARY_CLIENT_SECRET }} >> .env
+          echo PORT=4002 >> .env
+          cat .env
+          
+      - name: Generate deployment package
+        run: |
+          zip -r deploy.zip . -x '*.git'
+      
+      - name: Deploy on Elastic beanstalk Production Env
+        uses: einaregilsson/beanstalk-deploy@v20
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: update17new
+          environment_name: Update17new-env
+          version_label: "ver-${{ github.sha }}"
+          region: us-east-1
+          deployment_package: deploy.zip
+
+    env:
+          DEBUG: true
+        

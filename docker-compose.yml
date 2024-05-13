@@ -1,0 +1,89 @@
+version: "3"
+services:
+  nosql-db:
+    image: mvertes/alpine-mongo
+    ports:
+      - "27018:27017"
+    container_name: nosql-db
+    volumes:
+      - ./db/:/data/db
+
+  application:
+    build:
+      dockerfile: Dockerfile
+      context: ./application
+    container_name: application
+    ports:
+      - "4003:4003"
+    restart: always
+    depends_on:
+      - "nosql-db"
+    volumes:
+      - .:/app
+      - /app/application/node_modules
+
+    env_file:
+      - ./application/config/config.env
+
+  blog:
+    build:
+      dockerfile: Dockerfile
+      context: ./blog
+    container_name: blog
+    ports:
+      - "4004:4004"
+    restart: always
+    depends_on:
+      - "nosql-db"
+    volumes:
+      - .:/app
+      - /app/blog/node_modules
+
+    env_file:
+      - ./blog/config/config.env
+
+  job:
+    build:
+      dockerfile: Dockerfile
+      context: ./job
+    container_name: job
+    ports:
+      - "4001:4001"
+    restart: always
+    depends_on:
+      - "nosql-db"
+    volumes:
+      - .:/app
+      - /app/job/node_modules
+    env_file:
+      - ./job/config/config.env
+
+
+  user:
+    build:
+      dockerfile: Dockerfile
+      context: ./user
+    container_name: user
+    ports:
+      - "4002:4002"
+    restart: always
+    depends_on:
+      - "nosql-db"
+    volumes:
+      - .:/app/
+      - /app/user/node_modules
+    env_file:
+      - ./user/config/config.env
+
+
+  nginx-proxy:
+    build:
+      dockerfile: Dockerfile
+      context: ./proxy
+    depends_on:
+      - user
+      - application
+      - job
+      - blog
+    ports:
+      - 4000:4000
